@@ -1,0 +1,7 @@
+fastapi
+uvicorn[standard]
+firebase-admin
+openai
+python-dotenv
+pydantic
+gspread
