@@ -103,7 +103,7 @@ flowchart LR
     F --> G[get_data_summary]
     F --> H[get_data_range]
 
-    I[외부 MCP Client] --> J[/mcp]
+    I[외부 MCP Client] --> J["/mcp"]
     J --> C
 
     D --> K[data Collection]
