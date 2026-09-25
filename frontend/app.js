@@ -1,11 +1,20 @@
 const API_BASE_URL =
   window.APP_CONFIG.API_BASE_URL;
 
+
+// ==================================================
+// 전역 상태
+// ==================================================
+
 let currentConversationId = null;
 
 let cachedData = [];
 
 let trendChart = null;
+
+// null이면 추가 모드
+// 값이 있으면 수정 모드
+let editingDocumentId = null;
 
 
 // ==================================================
@@ -32,6 +41,7 @@ async function api(
       }
     );
 
+
   if (!response.ok) {
 
     let message =
@@ -43,16 +53,20 @@ async function api(
         await response.json();
 
       if (error.detail) {
-        message = error.detail;
+        message =
+          error.detail;
       }
 
     } catch (error) {
-      // JSON 형태의 오류가 아니면
-      // 기본 오류 메시지 사용
+      // JSON 오류 응답이 아닐 경우
+      // 기본 오류 문구 사용
     }
 
-    throw new Error(message);
+    throw new Error(
+      message
+    );
   }
+
 
   return response.json();
 }
@@ -84,6 +98,7 @@ async function loadSummary() {
 
     const comparison =
       summary.comparison || {};
+
 
     summaryElement.innerHTML = `
 
@@ -211,6 +226,7 @@ async function loadSummary() {
           )}
         </strong>
       </div>
+
     `;
 
   } catch (error) {
@@ -237,32 +253,40 @@ chatForm.addEventListener(
 
     event.preventDefault();
 
+
     const input =
       document.getElementById(
         "chat-input"
       );
 
+
     const message =
       input.value.trim();
+
 
     if (!message) {
       return;
     }
+
 
     addChatMessage(
       "user",
       message
     );
 
+
     input.value = "";
 
+
     setLoading(true);
+
 
     try {
 
       const body = {
         message
       };
+
 
       if (
         currentConversationId
@@ -272,6 +296,7 @@ chatForm.addEventListener(
           currentConversationId;
       }
 
+
       const response =
         await api(
           "/api/chat",
@@ -279,17 +304,22 @@ chatForm.addEventListener(
             method: "POST",
 
             body:
-              JSON.stringify(body)
+              JSON.stringify(
+                body
+              )
           }
         );
 
+
       currentConversationId =
         response.conversation_id;
+
 
       addChatMessage(
         "assistant",
         response.answer
       );
+
 
       await loadConversations();
 
@@ -308,9 +338,46 @@ chatForm.addEventListener(
 );
 
 
-// --------------------------------------------------
+// ==================================================
+// AI Markdown 정규화
+// ==================================================
+
+function normalizeAssistantMarkdown(
+  content
+) {
+
+  if (!content) {
+    return "";
+  }
+
+
+  return content
+
+    // 불필요하게 이스케이프된
+    // Markdown 문자 복구
+    .replace(/\\\*/g, "*")
+    .replace(/\\~/g, "~")
+    .replace(/\\#/g, "#")
+    .replace(/\\`/g, "`")
+
+    // 숫자 범위의 ~~를 ~로 변환
+    .replace(
+      /(\d+(?:\.\d+)?)~~(\d+(?:\.\d+)?)/g,
+      "$1~$2"
+    )
+
+    // 날짜 범위
+    // 7/1~~7/9 → 7/1~7/9
+    .replace(
+      /(\d{1,2}\/\d{1,2})~~(\d{1,2}\/\d{1,2})/g,
+      "$1~$2"
+    );
+}
+
+
+// ==================================================
 // 채팅 메시지 표시
-// --------------------------------------------------
+// ==================================================
 
 function addChatMessage(
   role,
@@ -322,10 +389,12 @@ function addChatMessage(
       "chat-messages"
     );
 
+
   const element =
     document.createElement(
       "div"
     );
+
 
   element.className =
     role === "user"
@@ -333,26 +402,24 @@ function addChatMessage(
       : "assistant-message";
 
 
-  // 사용자 입력은 문자 그대로 표시
   if (role === "user") {
 
     element.textContent =
       content;
 
-  }
-
-  // AI 응답은 Markdown 렌더링
-  else {
+  } else {
 
     const normalizedContent =
       normalizeAssistantMarkdown(
         content
       );
 
+
     const html =
       marked.parse(
         normalizedContent
       );
+
 
     element.innerHTML =
       DOMPurify.sanitize(
@@ -360,18 +427,20 @@ function addChatMessage(
       );
   }
 
+
   container.appendChild(
     element
   );
+
 
   container.scrollTop =
     container.scrollHeight;
 }
 
 
-// --------------------------------------------------
-// 로딩 표시
-// --------------------------------------------------
+// ==================================================
+// 채팅 로딩
+// ==================================================
 
 function setLoading(show) {
 
@@ -379,7 +448,8 @@ function setLoading(show) {
     .getElementById(
       "loading"
     )
-    .classList.toggle(
+    .classList
+    .toggle(
       "hidden",
       !show
     );
@@ -387,7 +457,7 @@ function setLoading(show) {
 
 
 // ==================================================
-// 대화 기록
+// 대화 목록
 // ==================================================
 
 async function loadConversations() {
@@ -397,6 +467,7 @@ async function loadConversations() {
       "conversation-list"
     );
 
+
   try {
 
     const conversations =
@@ -404,7 +475,10 @@ async function loadConversations() {
         "/api/conversations"
       );
 
-    container.innerHTML = "";
+
+    container.innerHTML =
+      "";
+
 
     if (
       !conversations.length
@@ -425,11 +499,14 @@ async function loadConversations() {
             "div"
           );
 
+
         element.className =
           "conversation-item";
 
+
         element.textContent =
           conversation.title;
+
 
         element.addEventListener(
           "click",
@@ -441,6 +518,7 @@ async function loadConversations() {
 
           }
         );
+
 
         container.appendChild(
           element
@@ -456,9 +534,9 @@ async function loadConversations() {
 }
 
 
-// --------------------------------------------------
+// ==================================================
 // 특정 대화 불러오기
-// --------------------------------------------------
+// ==================================================
 
 async function loadConversation(id) {
 
@@ -469,15 +547,19 @@ async function loadConversation(id) {
         `/api/conversations/${id}`
       );
 
+
     currentConversationId =
       id;
+
 
     const container =
       document.getElementById(
         "chat-messages"
       );
 
-    container.innerHTML = "";
+
+    container.innerHTML =
+      "";
 
 
     conversation.messages.forEach(
@@ -500,9 +582,9 @@ async function loadConversation(id) {
 }
 
 
-// --------------------------------------------------
+// ==================================================
 // 새 대화
-// --------------------------------------------------
+// ==================================================
 
 document
   .getElementById(
@@ -515,20 +597,23 @@ document
       currentConversationId =
         null;
 
-      document.getElementById(
-        "chat-messages"
-      ).innerHTML = `
-        <div class="assistant-message">
-          새로운 대화를 시작합니다.
-          옥션슈트 데이터에 대해 질문해 주세요.
-        </div>
-      `;
+
+      document
+        .getElementById(
+          "chat-messages"
+        )
+        .innerHTML = `
+          <div class="assistant-message">
+            새로운 대화를 시작합니다.
+            옥션슈트 데이터에 대해 질문해 주세요.
+          </div>
+        `;
     }
   );
 
 
 // ==================================================
-// 데이터 관리
+// 데이터 목록
 // ==================================================
 
 async function loadData() {
@@ -538,6 +623,7 @@ async function loadData() {
       "data-table-body"
     );
 
+
   try {
 
     const data =
@@ -545,16 +631,18 @@ async function loadData() {
         "/api/data"
       );
 
+
     cachedData =
       data;
 
+
     renderChart();
+
 
     tableBody.innerHTML =
       "";
 
 
-    // 최근 데이터가 위로 표시
     [...data]
       .reverse()
       .forEach(
@@ -565,7 +653,9 @@ async function loadData() {
               "tr"
             );
 
+
           tr.innerHTML = `
+
             <td>
               ${row.date ?? "-"}
             </td>
@@ -599,6 +689,15 @@ async function loadData() {
             </td>
 
             <td>
+
+              <button
+                class="edit-button"
+                data-id="${row.id}"
+                type="button"
+              >
+                수정
+              </button>
+
               <button
                 class="delete-button"
                 data-id="${row.id}"
@@ -606,8 +705,10 @@ async function loadData() {
               >
                 삭제
               </button>
+
             </td>
           `;
+
 
           tableBody.appendChild(
             tr
@@ -616,6 +717,29 @@ async function loadData() {
       );
 
 
+    // 수정 버튼
+    document
+      .querySelectorAll(
+        ".edit-button"
+      )
+      .forEach(
+        button => {
+
+          button.addEventListener(
+            "click",
+            () => {
+
+              startEditData(
+                button.dataset.id
+              );
+
+            }
+          );
+        }
+      );
+
+
+    // 삭제 버튼
     document
       .querySelectorAll(
         ".delete-button"
@@ -650,9 +774,177 @@ async function loadData() {
 }
 
 
-// --------------------------------------------------
-// 데이터 추가
-// --------------------------------------------------
+// ==================================================
+// 수정 모드 시작
+// ==================================================
+
+function startEditData(id) {
+
+  const row =
+    cachedData.find(
+      item =>
+        item.id === id
+    );
+
+
+  if (!row) {
+
+    alert(
+      "수정할 데이터를 찾을 수 없습니다."
+    );
+
+    return;
+  }
+
+
+  editingDocumentId =
+    id;
+
+
+  const dateInput =
+    document.getElementById(
+      "data-date"
+    );
+
+  const valueInput =
+    document.getElementById(
+      "data-value"
+    );
+
+  const memoInput =
+    document.getElementById(
+      "data-memo"
+    );
+
+
+  dateInput.value =
+    row.date || id;
+
+
+  valueInput.value =
+    row.pv ??
+    row.value ??
+    "";
+
+
+  memoInput.value =
+    row.memo ?? "";
+
+
+  // 날짜는 Firestore 문서 ID이므로
+  // 수정하지 못하게 설정
+  dateInput.disabled =
+    true;
+
+
+  document
+    .getElementById(
+      "data-submit-button"
+    )
+    .textContent =
+      "수정 저장";
+
+
+  document
+    .getElementById(
+      "edit-cancel-button"
+    )
+    .classList
+    .remove(
+      "hidden"
+    );
+
+
+  const status =
+    document.getElementById(
+      "edit-status"
+    );
+
+
+  status.textContent =
+    `${id} 데이터를 수정 중입니다.`;
+
+
+  status.classList.remove(
+    "hidden"
+  );
+
+
+  valueInput.focus();
+}
+
+
+// ==================================================
+// 수정 모드 해제
+// ==================================================
+
+function cancelEditData() {
+
+  editingDocumentId =
+    null;
+
+
+  const form =
+    document.getElementById(
+      "data-form"
+    );
+
+
+  form.reset();
+
+
+  document
+    .getElementById(
+      "data-date"
+    )
+    .disabled =
+      false;
+
+
+  document
+    .getElementById(
+      "data-submit-button"
+    )
+    .textContent =
+      "추가";
+
+
+  document
+    .getElementById(
+      "edit-cancel-button"
+    )
+    .classList
+    .add(
+      "hidden"
+    );
+
+
+  document
+    .getElementById(
+      "edit-status"
+    )
+    .classList
+    .add(
+      "hidden"
+    );
+}
+
+
+// 수정 취소 버튼
+
+document
+  .getElementById(
+    "edit-cancel-button"
+  )
+  .addEventListener(
+    "click",
+    cancelEditData
+  );
+
+
+// ==================================================
+// 데이터 추가 / 수정
+// ==================================================
 
 document
   .getElementById(
@@ -664,44 +956,117 @@ document
 
       event.preventDefault();
 
-      const date =
+
+      const dateInput =
         document.getElementById(
           "data-date"
-        ).value;
+        );
+
+
+      const valueInput =
+        document.getElementById(
+          "data-value"
+        );
+
+
+      const memoInput =
+        document.getElementById(
+          "data-memo"
+        );
+
+
+      const date =
+        dateInput.value;
+
 
       const value =
         Number(
-          document.getElementById(
-            "data-value"
-          ).value
+          valueInput.value
         );
 
+
       const memo =
-        document.getElementById(
-          "data-memo"
-        ).value;
+        memoInput.value.trim();
+
+
+      if (
+        Number.isNaN(value)
+      ) {
+
+        alert(
+          "PV 값을 숫자로 입력해 주세요."
+        );
+
+        return;
+      }
 
 
       try {
 
-        await api(
-          "/api/data",
-          {
-            method: "POST",
+        // ==========================================
+        // 수정 모드
+        // ==========================================
 
-            body:
-              JSON.stringify(
-                {
-                  date,
-                  value,
-                  pv: value,
-                  memo
-                }
-              )
-          }
-        );
+        if (
+          editingDocumentId
+        ) {
 
-        event.target.reset();
+          await api(
+            `/api/data/${editingDocumentId}`,
+            {
+              method: "PUT",
+
+              body:
+                JSON.stringify(
+                  {
+                    value,
+                    pv: value,
+                    memo
+                  }
+                )
+            }
+          );
+
+
+          alert(
+            `${editingDocumentId} 데이터가 수정되었습니다.`
+          );
+
+
+          cancelEditData();
+        }
+
+
+        // ==========================================
+        // 추가 모드
+        // ==========================================
+
+        else {
+
+          await api(
+            "/api/data",
+            {
+              method: "POST",
+
+              body:
+                JSON.stringify(
+                  {
+                    date,
+                    value,
+                    pv: value,
+                    memo
+                  }
+                )
+            }
+          );
+
+
+          event.target.reset();
+        }
+
+
+        // 데이터가 바뀌었으므로
+        // 표 + 그래프 + 요약 갱신
 
         await Promise.all([
           loadData(),
@@ -711,16 +1076,18 @@ document
       } catch (error) {
 
         alert(
-          `데이터 추가 실패: ${error.message}`
+          editingDocumentId
+            ? `데이터 수정 실패: ${error.message}`
+            : `데이터 추가 실패: ${error.message}`
         );
       }
     }
   );
 
 
-// --------------------------------------------------
+// ==================================================
 // 데이터 삭제
-// --------------------------------------------------
+// ==================================================
 
 async function deleteData(id) {
 
@@ -729,9 +1096,11 @@ async function deleteData(id) {
       `${id} 데이터를 삭제하시겠습니까?`
     );
 
+
   if (!confirmed) {
     return;
   }
+
 
   try {
 
@@ -741,6 +1110,17 @@ async function deleteData(id) {
         method: "DELETE"
       }
     );
+
+
+    // 수정 중이던 데이터를
+    // 삭제한 경우 수정 모드 해제
+    if (
+      editingDocumentId === id
+    ) {
+
+      cancelEditData();
+    }
+
 
     await Promise.all([
       loadData(),
@@ -762,14 +1142,19 @@ async function deleteData(id) {
 
 function renderChart() {
 
-  if (!cachedData.length) {
+  if (
+    !cachedData.length
+  ) {
     return;
   }
 
+
   const metric =
-    document.getElementById(
-      "chart-metric"
-    ).value;
+    document
+      .getElementById(
+        "chart-metric"
+      )
+      .value;
 
 
   const recentData =
@@ -785,7 +1170,8 @@ function renderChart() {
 
   const labels =
     recentData.map(
-      row => row.date
+      row =>
+        row.date
     );
 
 
@@ -797,7 +1183,9 @@ function renderChart() {
 
 
   const metricLabels = {
-    pv: "PV",
+
+    pv:
+      "PV",
 
     users:
       "사용자",
@@ -816,7 +1204,9 @@ function renderChart() {
     );
 
 
-  if (trendChart) {
+  if (
+    trendChart
+  ) {
 
     trendChart.destroy();
   }
@@ -827,7 +1217,8 @@ function renderChart() {
       canvas,
       {
 
-        type: "line",
+        type:
+          "line",
 
         data: {
 
@@ -849,23 +1240,32 @@ function renderChart() {
           ]
         },
 
+
         options: {
 
-          responsive: true,
+          responsive:
+            true,
 
           maintainAspectRatio:
             false,
 
+
           interaction: {
-            intersect: false,
-            mode: "index"
+
+            intersect:
+              false,
+
+            mode:
+              "index"
           },
+
 
           scales: {
 
             x: {
 
               ticks: {
+
                 maxTicksLimit:
                   10
               }
@@ -876,6 +1276,8 @@ function renderChart() {
     );
 }
 
+
+// 그래프 지표 변경
 
 document
   .getElementById(
@@ -903,7 +1305,9 @@ document
 
 function exportCsv() {
 
-  if (!cachedData.length) {
+  if (
+    !cachedData.length
+  ) {
 
     alert(
       "내보낼 데이터가 없습니다."
@@ -914,17 +1318,29 @@ function exportCsv() {
 
 
   const columns = [
+
     "date",
+
     "value",
+
     "memo",
+
     "posts",
+
     "pages",
+
     "users",
+
     "pv",
+
     "adsense_estimated",
+
     "gsc_clicks",
+
     "gsc_impressions",
+
     "gsc_ctr",
+
     "gsc_position"
   ];
 
@@ -956,7 +1372,6 @@ function exportCsv() {
       .join("\n");
 
 
-  // Excel 한글 깨짐 방지용 BOM
   const blob =
     new Blob(
       [
@@ -980,6 +1395,7 @@ function exportCsv() {
       "a"
     );
 
+
   link.href =
     url;
 
@@ -996,7 +1412,9 @@ function exportCsv() {
     link
   );
 
+
   link.click();
+
 
   link.remove();
 
@@ -1010,7 +1428,9 @@ function exportCsv() {
 function csvEscape(value) {
 
   const text =
-    String(value);
+    String(
+      value
+    );
 
 
   if (
@@ -1024,6 +1444,7 @@ function csvEscape(value) {
       "\"\""
     )}"`;
   }
+
 
   return text;
 }
@@ -1051,9 +1472,13 @@ function applySavedTheme() {
     savedTheme === "dark"
   ) {
 
-    document.body.classList.add(
-      "dark-mode"
-    );
+    document
+      .body
+      .classList
+      .add(
+        "dark-mode"
+      );
+
 
     themeButton.textContent =
       "라이트 모드";
@@ -1071,7 +1496,8 @@ themeButton.addEventListener(
   () => {
 
     const isDark =
-      document.body
+      document
+        .body
         .classList
         .toggle(
           "dark-mode"
@@ -1092,7 +1518,6 @@ themeButton.addEventListener(
         : "다크 모드";
 
 
-    // 테마 변경 후 그래프 다시 그리기
     renderChart();
   }
 );
@@ -1108,13 +1533,30 @@ function formatPercent(value) {
     value === null ||
     value === undefined
   ) {
+
+    return "-";
+  }
+
+
+  const number =
+    Number(
+      value
+    );
+
+
+  if (
+    Number.isNaN(
+      number
+    )
+  ) {
+
     return "-";
   }
 
 
   return `${
     (
-      Number(value) * 100
+      number * 100
     ).toFixed(2)
   }%`;
 }
@@ -1126,17 +1568,23 @@ function formatNumber(value) {
     value === null ||
     value === undefined
   ) {
+
     return "-";
   }
 
 
   const number =
-    Number(value);
+    Number(
+      value
+    );
 
 
   if (
-    Number.isNaN(number)
+    Number.isNaN(
+      number
+    )
   ) {
+
     return "-";
   }
 
@@ -1151,17 +1599,23 @@ function formatChange(value) {
     value === null ||
     value === undefined
   ) {
+
     return "-";
   }
 
 
   const number =
-    Number(value);
+    Number(
+      value
+    );
 
 
   if (
-    Number.isNaN(number)
+    Number.isNaN(
+      number
+    )
   ) {
+
     return "-";
   }
 
@@ -1177,34 +1631,6 @@ function formatChange(value) {
   }${
     number.toFixed(2)
   }%`;
-}
-
-function normalizeAssistantMarkdown(content) {
-
-  if (!content) {
-    return "";
-  }
-
-  return content
-    // GPT가 불필요하게 이스케이프한 Markdown 기호 복원
-    .replace(/\\\*/g, "*")
-    .replace(/\\~/g, "~")
-    .replace(/\\#/g, "#")
-    .replace(/\\`/g, "`")
-
-    // 숫자 사이의 ~~를 범위 기호 ~로 정리
-    // 예: 0.04~~0.41 → 0.04~0.41
-    .replace(
-      /(\d+(?:\.\d+)?)~~(\d+(?:\.\d+)?)/g,
-      "$1~$2"
-    )
-
-    // 날짜 숫자 사이의 ~~도 정리
-    // 예: 7/1~~7/9 → 7/1~7/9
-    .replace(
-      /(\d{1,2}\/\d{1,2})~~(\d{1,2}\/\d{1,2})/g,
-      "$1~$2"
-    );
 }
 
 

@@ -2,24 +2,36 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
 
   <title>옥션슈트 AI 데이터 비서</title>
 
-  <link rel="stylesheet" href="styles.css" />
+  <link
+    rel="stylesheet"
+    href="styles.css"
+  />
 </head>
 
 <body>
 
   <header>
     <div>
-      <h1>옥션슈트 AI 데이터 비서</h1>
+      <h1>
+        옥션슈트 AI 데이터 비서
+      </h1>
+
       <p>
         옥션슈트 통계 데이터를 기반으로 분석하고 답변합니다.
       </p>
     </div>
 
-    <button id="theme-button" type="button">
+    <button
+      id="theme-button"
+      type="button"
+    >
       다크 모드
     </button>
   </header>
@@ -31,6 +43,7 @@
     <aside class="sidebar">
 
       <div class="section-title">
+
         <h2>이전 대화</h2>
 
         <button
@@ -39,6 +52,7 @@
         >
           새 대화
         </button>
+
       </div>
 
       <div id="conversation-list">
@@ -66,7 +80,7 @@
       </section>
 
 
-      <!-- 최근 추세 그래프 -->
+      <!-- 최근 30일 그래프 -->
       <section class="panel">
 
         <div class="section-title">
@@ -74,20 +88,31 @@
           <h2>최근 30일 추세</h2>
 
           <select id="chart-metric">
-            <option value="pv">PV</option>
-            <option value="users">사용자</option>
+
+            <option value="pv">
+              PV
+            </option>
+
+            <option value="users">
+              사용자
+            </option>
+
             <option value="gsc_clicks">
               GSC 클릭
             </option>
+
             <option value="gsc_impressions">
               GSC 노출
             </option>
+
           </select>
 
         </div>
 
         <div class="chart-container">
+
           <canvas id="trend-chart"></canvas>
+
         </div>
 
       </section>
@@ -169,6 +194,7 @@
           <input
             id="data-value"
             type="number"
+            step="any"
             placeholder="PV"
             required
           />
@@ -179,11 +205,30 @@
             placeholder="메모"
           />
 
-          <button type="submit">
+          <button
+            id="data-submit-button"
+            type="submit"
+          >
             추가
           </button>
 
+          <button
+            id="edit-cancel-button"
+            class="hidden"
+            type="button"
+          >
+            수정 취소
+          </button>
+
         </form>
+
+
+        <div
+          id="edit-status"
+          class="loading hidden"
+        >
+          데이터를 수정하는 중입니다.
+        </div>
 
 
         <div class="table-wrapper">
@@ -217,12 +262,12 @@
   </main>
 
 
-  <!-- Markdown 렌더링 -->
+  <!-- Markdown -->
   <script
     src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"
   ></script>
 
-  <!-- Markdown HTML 보안 처리 -->
+  <!-- HTML 보안 처리 -->
   <script
     src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"
   ></script>
