@@ -4,7 +4,7 @@ import json
 from mcp import Client
 
 
-MCP_URL = "http://127.0.0.1:8000/mcp"
+MCP_URL = "https://m1-2-auctionsuit-ai.onrender.com/mcp"
 
 
 async def main():
