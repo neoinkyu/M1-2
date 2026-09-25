@@ -555,3 +555,84 @@ body.dark-mode .loading {
     max-width: 95%;
   }
 }
+
+/* ---------------------------------
+   Data form - expanded
+--------------------------------- */
+
+.data-form {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(160px, 1fr)
+    );
+
+  gap: 12px;
+
+  margin-top: 15px;
+}
+
+.form-field {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 5px;
+}
+
+.form-field label {
+  font-size: 13px;
+
+  font-weight: 600;
+}
+
+.form-field input {
+  width: 100%;
+}
+
+.form-field-wide {
+  grid-column:
+    span 2;
+}
+
+.form-actions {
+  display: flex;
+
+  align-items: flex-end;
+
+  gap: 8px;
+}
+
+
+/* 관리 버튼 간격 */
+
+.edit-button,
+.delete-button {
+  margin-right: 4px;
+
+  white-space: nowrap;
+}
+
+
+/* 메모 컬럼 */
+
+table td:nth-child(11) {
+  max-width: 260px;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+
+/* 모바일 */
+
+@media (max-width: 700px) {
+
+  .form-field-wide {
+    grid-column:
+      span 1;
+  }
+}

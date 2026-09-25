@@ -12,8 +12,6 @@ let cachedData = [];
 
 let trendChart = null;
 
-// null이면 추가 모드
-// 값이 있으면 수정 모드
 let editingDocumentId = null;
 
 
@@ -58,9 +56,11 @@ async function api(
       }
 
     } catch (error) {
-      // JSON 오류 응답이 아닐 경우
-      // 기본 오류 문구 사용
+
+      // JSON 형식의 오류가 아닌 경우
+      // 기본 오류 메시지 사용
     }
+
 
     throw new Error(
       message
@@ -83,6 +83,7 @@ async function loadSummary() {
       "summary"
     );
 
+
   try {
 
     const summary =
@@ -90,11 +91,14 @@ async function loadSummary() {
         "/api/data/summary"
       );
 
+
     const metrics =
       summary.metrics || {};
 
+
     const trend =
       summary.trend || {};
+
 
     const comparison =
       summary.comparison || {};
@@ -275,10 +279,13 @@ chatForm.addEventListener(
     );
 
 
-    input.value = "";
+    input.value =
+      "";
 
 
-    setLoading(true);
+    setLoading(
+      true
+    );
 
 
     try {
@@ -301,7 +308,8 @@ chatForm.addEventListener(
         await api(
           "/api/chat",
           {
-            method: "POST",
+            method:
+              "POST",
 
             body:
               JSON.stringify(
@@ -332,14 +340,16 @@ chatForm.addEventListener(
 
     } finally {
 
-      setLoading(false);
+      setLoading(
+        false
+      );
     }
   }
 );
 
 
 // ==================================================
-// AI Markdown 정규화
+// Markdown 보정
 // ==================================================
 
 function normalizeAssistantMarkdown(
@@ -353,21 +363,31 @@ function normalizeAssistantMarkdown(
 
   return content
 
-    // 불필요하게 이스케이프된
-    // Markdown 문자 복구
-    .replace(/\\\*/g, "*")
-    .replace(/\\~/g, "~")
-    .replace(/\\#/g, "#")
-    .replace(/\\`/g, "`")
+    .replace(
+      /\\\*/g,
+      "*"
+    )
 
-    // 숫자 범위의 ~~를 ~로 변환
+    .replace(
+      /\\~/g,
+      "~"
+    )
+
+    .replace(
+      /\\#/g,
+      "#"
+    )
+
+    .replace(
+      /\\`/g,
+      "`"
+    )
+
     .replace(
       /(\d+(?:\.\d+)?)~~(\d+(?:\.\d+)?)/g,
       "$1~$2"
     )
 
-    // 날짜 범위
-    // 7/1~~7/9 → 7/1~7/9
     .replace(
       /(\d{1,2}\/\d{1,2})~~(\d{1,2}\/\d{1,2})/g,
       "$1~$2"
@@ -376,7 +396,7 @@ function normalizeAssistantMarkdown(
 
 
 // ==================================================
-// 채팅 메시지 표시
+// 채팅 메시지 출력
 // ==================================================
 
 function addChatMessage(
@@ -402,7 +422,9 @@ function addChatMessage(
       : "assistant-message";
 
 
-  if (role === "user") {
+  if (
+    role === "user"
+  ) {
 
     element.textContent =
       content;
@@ -442,7 +464,9 @@ function addChatMessage(
 // 채팅 로딩
 // ==================================================
 
-function setLoading(show) {
+function setLoading(
+  show
+) {
 
   document
     .getElementById(
@@ -535,10 +559,12 @@ async function loadConversations() {
 
 
 // ==================================================
-// 특정 대화 불러오기
+// 특정 대화
 // ==================================================
 
-async function loadConversation(id) {
+async function loadConversation(
+  id
+) {
 
   try {
 
@@ -613,7 +639,7 @@ document
 
 
 // ==================================================
-// 데이터 목록
+// 데이터 조회
 // ==================================================
 
 async function loadData() {
@@ -660,21 +686,43 @@ async function loadData() {
               ${row.date ?? "-"}
             </td>
 
+
             <td>
-              ${row.pv ?? row.value ?? "-"}
+              ${row.posts ?? "-"}
             </td>
+
+
+            <td>
+              ${row.pages ?? "-"}
+            </td>
+
 
             <td>
               ${row.users ?? "-"}
             </td>
 
+
+            <td>
+              ${row.pv ?? row.value ?? "-"}
+            </td>
+
+
+            <td>
+              ${formatMoney(
+                row.adsense_estimated
+              )}
+            </td>
+
+
             <td>
               ${row.gsc_clicks ?? "-"}
             </td>
 
+
             <td>
               ${row.gsc_impressions ?? "-"}
             </td>
+
 
             <td>
               ${formatPercent(
@@ -682,11 +730,20 @@ async function loadData() {
               )}
             </td>
 
+
             <td>
               ${formatNumber(
                 row.gsc_position
               )}
             </td>
+
+
+            <td>
+              ${escapeHtml(
+                row.memo ?? ""
+              )}
+            </td>
+
 
             <td>
 
@@ -697,6 +754,7 @@ async function loadData() {
               >
                 수정
               </button>
+
 
               <button
                 class="delete-button"
@@ -717,7 +775,8 @@ async function loadData() {
       );
 
 
-    // 수정 버튼
+    // 수정 버튼 이벤트
+
     document
       .querySelectorAll(
         ".edit-button"
@@ -739,7 +798,8 @@ async function loadData() {
       );
 
 
-    // 삭제 버튼
+    // 삭제 버튼 이벤트
+
     document
       .querySelectorAll(
         ".delete-button"
@@ -764,7 +824,7 @@ async function loadData() {
 
     tableBody.innerHTML = `
       <tr>
-        <td colspan="8">
+        <td colspan="12">
           데이터를 불러오지 못했습니다:
           ${error.message}
         </td>
@@ -775,10 +835,12 @@ async function loadData() {
 
 
 // ==================================================
-// 수정 모드 시작
+// 수정 시작
 // ==================================================
 
-function startEditData(id) {
+function startEditData(
+  id
+) {
 
   const row =
     cachedData.find(
@@ -801,58 +863,104 @@ function startEditData(id) {
     id;
 
 
-  const dateInput =
-    document.getElementById(
-      "data-date"
-    );
-
-  const valueInput =
-    document.getElementById(
-      "data-value"
-    );
-
-  const memoInput =
-    document.getElementById(
-      "data-memo"
-    );
-
-
-  dateInput.value =
+  document.getElementById(
+    "data-date"
+  ).value =
     row.date || id;
 
 
-  valueInput.value =
+  document.getElementById(
+    "data-posts"
+  ).value =
+    row.posts ?? "";
+
+
+  document.getElementById(
+    "data-pages"
+  ).value =
+    row.pages ?? "";
+
+
+  document.getElementById(
+    "data-users"
+  ).value =
+    row.users ?? "";
+
+
+  document.getElementById(
+    "data-pv"
+  ).value =
     row.pv ??
     row.value ??
     "";
 
 
-  memoInput.value =
+  document.getElementById(
+    "data-adsense"
+  ).value =
+    row.adsense_estimated ?? "";
+
+
+  document.getElementById(
+    "data-gsc-clicks"
+  ).value =
+    row.gsc_clicks ?? "";
+
+
+  document.getElementById(
+    "data-gsc-impressions"
+  ).value =
+    row.gsc_impressions ?? "";
+
+
+  // Firestore에서는 0.0161
+  // 화면에서는 1.61%
+
+  document.getElementById(
+    "data-gsc-ctr"
+  ).value =
+    row.gsc_ctr !== null &&
+    row.gsc_ctr !== undefined
+      ? (
+          Number(
+            row.gsc_ctr
+          ) * 100
+        ).toFixed(2)
+      : "";
+
+
+  document.getElementById(
+    "data-gsc-position"
+  ).value =
+    row.gsc_position ?? "";
+
+
+  document.getElementById(
+    "data-memo"
+  ).value =
     row.memo ?? "";
 
 
-  // 날짜는 Firestore 문서 ID이므로
-  // 수정하지 못하게 설정
-  dateInput.disabled =
+  // 날짜 = Firestore 문서 ID
+  // 수정 금지
+
+  document.getElementById(
+    "data-date"
+  ).disabled =
     true;
 
 
-  document
-    .getElementById(
-      "data-submit-button"
-    )
-    .textContent =
-      "수정 저장";
+  document.getElementById(
+    "data-submit-button"
+  ).textContent =
+    "수정 저장";
 
 
-  document
-    .getElementById(
-      "edit-cancel-button"
-    )
-    .classList
-    .remove(
-      "hidden"
-    );
+  document.getElementById(
+    "edit-cancel-button"
+  ).classList.remove(
+    "hidden"
+  );
 
 
   const status =
@@ -870,12 +978,14 @@ function startEditData(id) {
   );
 
 
-  valueInput.focus();
+  document.getElementById(
+    "data-pv"
+  ).focus();
 }
 
 
 // ==================================================
-// 수정 모드 해제
+// 수정 취소
 // ==================================================
 
 function cancelEditData() {
@@ -893,44 +1003,32 @@ function cancelEditData() {
   form.reset();
 
 
-  document
-    .getElementById(
-      "data-date"
-    )
-    .disabled =
-      false;
+  document.getElementById(
+    "data-date"
+  ).disabled =
+    false;
 
 
-  document
-    .getElementById(
-      "data-submit-button"
-    )
-    .textContent =
-      "추가";
+  document.getElementById(
+    "data-submit-button"
+  ).textContent =
+    "추가";
 
 
-  document
-    .getElementById(
-      "edit-cancel-button"
-    )
-    .classList
-    .add(
-      "hidden"
-    );
+  document.getElementById(
+    "edit-cancel-button"
+  ).classList.add(
+    "hidden"
+  );
 
 
-  document
-    .getElementById(
-      "edit-status"
-    )
-    .classList
-    .add(
-      "hidden"
-    );
+  document.getElementById(
+    "edit-status"
+  ).classList.add(
+    "hidden"
+  );
 }
 
-
-// 수정 취소 버튼
 
 document
   .getElementById(
@@ -940,6 +1038,213 @@ document
     "click",
     cancelEditData
   );
+
+
+// ==================================================
+// 숫자 입력 보조 함수
+// ==================================================
+
+function getOptionalNumber(
+  elementId
+) {
+
+  const value =
+    document
+      .getElementById(
+        elementId
+      )
+      .value
+      .trim();
+
+
+  if (
+    value === ""
+  ) {
+
+    return undefined;
+  }
+
+
+  const number =
+    Number(
+      value
+    );
+
+
+  if (
+    Number.isNaN(
+      number
+    )
+  ) {
+
+    return undefined;
+  }
+
+
+  return number;
+}
+
+
+// ==================================================
+// 데이터 폼 → API payload
+// ==================================================
+
+function buildDataPayload() {
+
+  const pv =
+    Number(
+      document.getElementById(
+        "data-pv"
+      ).value
+    );
+
+
+  const ctrPercent =
+    getOptionalNumber(
+      "data-gsc-ctr"
+    );
+
+
+  const payload = {
+
+    // 과제 필수 value는
+    // PV와 항상 동일하게 유지
+
+    value:
+      pv,
+
+    pv:
+      pv,
+
+    memo:
+      document
+        .getElementById(
+          "data-memo"
+        )
+        .value
+        .trim(),
+
+    gsc_type:
+      "web"
+  };
+
+
+  const posts =
+    getOptionalNumber(
+      "data-posts"
+    );
+
+
+  const pages =
+    getOptionalNumber(
+      "data-pages"
+    );
+
+
+  const users =
+    getOptionalNumber(
+      "data-users"
+    );
+
+
+  const adsense =
+    getOptionalNumber(
+      "data-adsense"
+    );
+
+
+  const clicks =
+    getOptionalNumber(
+      "data-gsc-clicks"
+    );
+
+
+  const impressions =
+    getOptionalNumber(
+      "data-gsc-impressions"
+    );
+
+
+  const position =
+    getOptionalNumber(
+      "data-gsc-position"
+    );
+
+
+  if (
+    posts !== undefined
+  ) {
+
+    payload.posts =
+      posts;
+  }
+
+
+  if (
+    pages !== undefined
+  ) {
+
+    payload.pages =
+      pages;
+  }
+
+
+  if (
+    users !== undefined
+  ) {
+
+    payload.users =
+      users;
+  }
+
+
+  if (
+    adsense !== undefined
+  ) {
+
+    payload.adsense_estimated =
+      adsense;
+  }
+
+
+  if (
+    clicks !== undefined
+  ) {
+
+    payload.gsc_clicks =
+      clicks;
+  }
+
+
+  if (
+    impressions !== undefined
+  ) {
+
+    payload.gsc_impressions =
+      impressions;
+  }
+
+
+  if (
+    ctrPercent !== undefined
+  ) {
+
+    payload.gsc_ctr =
+      ctrPercent / 100;
+  }
+
+
+  if (
+    position !== undefined
+  ) {
+
+    payload.gsc_position =
+      position;
+  }
+
+
+  return payload;
+}
 
 
 // ==================================================
@@ -957,54 +1262,42 @@ document
       event.preventDefault();
 
 
-      const dateInput =
+      const date =
         document.getElementById(
           "data-date"
-        );
+        ).value;
 
 
-      const valueInput =
-        document.getElementById(
-          "data-value"
-        );
-
-
-      const memoInput =
-        document.getElementById(
-          "data-memo"
-        );
-
-
-      const date =
-        dateInput.value;
-
-
-      const value =
+      const pv =
         Number(
-          valueInput.value
+          document.getElementById(
+            "data-pv"
+          ).value
         );
-
-
-      const memo =
-        memoInput.value.trim();
 
 
       if (
-        Number.isNaN(value)
+        Number.isNaN(
+          pv
+        )
       ) {
 
         alert(
-          "PV 값을 숫자로 입력해 주세요."
+          "PV를 숫자로 입력해 주세요."
         );
 
         return;
       }
 
 
+      const payload =
+        buildDataPayload();
+
+
       try {
 
         // ==========================================
-        // 수정 모드
+        // 수정
         // ==========================================
 
         if (
@@ -1014,15 +1307,12 @@ document
           await api(
             `/api/data/${editingDocumentId}`,
             {
-              method: "PUT",
+              method:
+                "PUT",
 
               body:
                 JSON.stringify(
-                  {
-                    value,
-                    pv: value,
-                    memo
-                  }
+                  payload
                 )
             }
           );
@@ -1034,28 +1324,29 @@ document
 
 
           cancelEditData();
+
         }
 
 
         // ==========================================
-        // 추가 모드
+        // 추가
         // ==========================================
 
         else {
 
+          payload.date =
+            date;
+
+
           await api(
             "/api/data",
             {
-              method: "POST",
+              method:
+                "POST",
 
               body:
                 JSON.stringify(
-                  {
-                    date,
-                    value,
-                    pv: value,
-                    memo
-                  }
+                  payload
                 )
             }
           );
@@ -1064,9 +1355,6 @@ document
           event.target.reset();
         }
 
-
-        // 데이터가 바뀌었으므로
-        // 표 + 그래프 + 요약 갱신
 
         await Promise.all([
           loadData(),
@@ -1089,7 +1377,9 @@ document
 // 데이터 삭제
 // ==================================================
 
-async function deleteData(id) {
+async function deleteData(
+  id
+) {
 
   const confirmed =
     confirm(
@@ -1097,7 +1387,9 @@ async function deleteData(id) {
     );
 
 
-  if (!confirmed) {
+  if (
+    !confirmed
+  ) {
     return;
   }
 
@@ -1107,13 +1399,12 @@ async function deleteData(id) {
     await api(
       `/api/data/${id}`,
       {
-        method: "DELETE"
+        method:
+          "DELETE"
       }
     );
 
 
-    // 수정 중이던 데이터를
-    // 삭제한 경우 수정 모드 해제
     if (
       editingDocumentId === id
     ) {
@@ -1194,7 +1485,10 @@ function renderChart() {
       "GSC 클릭",
 
     gsc_impressions:
-      "GSC 노출"
+      "GSC 노출",
+
+    adsense_estimated:
+      "AdSense 예상수익"
   };
 
 
@@ -1226,6 +1520,7 @@ function renderChart() {
 
           datasets: [
             {
+
               label:
                 metricLabels[
                   metric
@@ -1276,8 +1571,6 @@ function renderChart() {
     );
 }
 
-
-// 그래프 지표 변경
 
 document
   .getElementById(
@@ -1334,6 +1627,8 @@ function exportCsv() {
     "pv",
 
     "adsense_estimated",
+
+    "gsc_type",
 
     "gsc_clicks",
 
@@ -1425,7 +1720,9 @@ function exportCsv() {
 }
 
 
-function csvEscape(value) {
+function csvEscape(
+  value
+) {
 
   const text =
     String(
@@ -1527,7 +1824,9 @@ themeButton.addEventListener(
 // 표시 형식
 // ==================================================
 
-function formatPercent(value) {
+function formatPercent(
+  value
+) {
 
   if (
     value === null ||
@@ -1562,7 +1861,9 @@ function formatPercent(value) {
 }
 
 
-function formatNumber(value) {
+function formatNumber(
+  value
+) {
 
   if (
     value === null ||
@@ -1593,7 +1894,42 @@ function formatNumber(value) {
 }
 
 
-function formatChange(value) {
+function formatMoney(
+  value
+) {
+
+  if (
+    value === null ||
+    value === undefined
+  ) {
+
+    return "-";
+  }
+
+
+  const number =
+    Number(
+      value
+    );
+
+
+  if (
+    Number.isNaN(
+      number
+    )
+  ) {
+
+    return "-";
+  }
+
+
+  return number.toFixed(2);
+}
+
+
+function formatChange(
+  value
+) {
 
   if (
     value === null ||
@@ -1635,7 +1971,29 @@ function formatChange(value) {
 
 
 // ==================================================
-// 초기 실행
+// HTML escape
+// ==================================================
+
+function escapeHtml(
+  value
+) {
+
+  const div =
+    document.createElement(
+      "div"
+    );
+
+
+  div.textContent =
+    value;
+
+
+  return div.innerHTML;
+}
+
+
+// ==================================================
+// 초기화
 // ==================================================
 
 async function initialize() {

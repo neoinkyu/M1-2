@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
+
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0"
@@ -17,11 +18,14 @@
 
 <body>
 
+  <!-- ==================================================
+       Header
+  ================================================== -->
+
   <header>
+
     <div>
-      <h1>
-        옥션슈트 AI 데이터 비서
-      </h1>
+      <h1>옥션슈트 AI 데이터 비서</h1>
 
       <p>
         옥션슈트 통계 데이터를 기반으로 분석하고 답변합니다.
@@ -34,12 +38,20 @@
     >
       다크 모드
     </button>
+
   </header>
 
 
+  <!-- ==================================================
+       Main
+  ================================================== -->
+
   <main>
 
-    <!-- 왼쪽: 이전 대화 -->
+    <!-- ==================================================
+         Sidebar
+    ================================================== -->
+
     <aside class="sidebar">
 
       <div class="section-title">
@@ -62,10 +74,17 @@
     </aside>
 
 
-    <!-- 오른쪽 콘텐츠 -->
+    <!-- ==================================================
+         Content
+    ================================================== -->
+
     <section class="content">
 
-      <!-- 데이터 요약 -->
+
+      <!-- ==================================================
+           데이터 요약
+      ================================================== -->
+
       <section class="panel">
 
         <h2>데이터 요약</h2>
@@ -80,7 +99,10 @@
       </section>
 
 
-      <!-- 최근 30일 그래프 -->
+      <!-- ==================================================
+           최근 30일 그래프
+      ================================================== -->
+
       <section class="panel">
 
         <div class="section-title">
@@ -105,6 +127,10 @@
               GSC 노출
             </option>
 
+            <option value="adsense_estimated">
+              AdSense
+            </option>
+
           </select>
 
         </div>
@@ -118,7 +144,10 @@
       </section>
 
 
-      <!-- AI 채팅 -->
+      <!-- ==================================================
+           AI 채팅
+      ================================================== -->
+
       <section class="panel chat-panel">
 
         <h2>AI 채팅</h2>
@@ -134,12 +163,14 @@
 
         </div>
 
+
         <div
           id="loading"
           class="loading hidden"
         >
           AI가 데이터를 분석하고 있습니다...
         </div>
+
 
         <form
           id="chat-form"
@@ -163,7 +194,10 @@
       </section>
 
 
-      <!-- 데이터 관리 -->
+      <!-- ==================================================
+           데이터 관리
+      ================================================== -->
+
       <section class="panel">
 
         <div class="section-title">
@@ -180,45 +214,242 @@
         </div>
 
 
+        <!-- ==================================================
+             데이터 입력/수정 폼
+        ================================================== -->
+
         <form
           id="data-form"
           class="data-form"
         >
 
-          <input
-            id="data-date"
-            type="date"
-            required
-          />
+          <!-- 날짜 -->
 
-          <input
-            id="data-value"
-            type="number"
-            step="any"
-            placeholder="PV"
-            required
-          />
+          <div class="form-field">
 
-          <input
-            id="data-memo"
-            type="text"
-            placeholder="메모"
-          />
+            <label for="data-date">
+              날짜
+            </label>
 
-          <button
-            id="data-submit-button"
-            type="submit"
-          >
-            추가
-          </button>
+            <input
+              id="data-date"
+              type="date"
+              required
+            />
 
-          <button
-            id="edit-cancel-button"
-            class="hidden"
-            type="button"
-          >
-            수정 취소
-          </button>
+          </div>
+
+
+          <!-- 게시물 -->
+
+          <div class="form-field">
+
+            <label for="data-posts">
+              게시물 수
+            </label>
+
+            <input
+              id="data-posts"
+              type="number"
+              min="0"
+              step="1"
+              placeholder="게시물"
+            />
+
+          </div>
+
+
+          <!-- 페이지 -->
+
+          <div class="form-field">
+
+            <label for="data-pages">
+              페이지 수
+            </label>
+
+            <input
+              id="data-pages"
+              type="number"
+              min="0"
+              step="1"
+              placeholder="페이지"
+            />
+
+          </div>
+
+
+          <!-- 사용자 -->
+
+          <div class="form-field">
+
+            <label for="data-users">
+              사용자 수
+            </label>
+
+            <input
+              id="data-users"
+              type="number"
+              min="0"
+              step="1"
+              placeholder="사용자"
+            />
+
+          </div>
+
+
+          <!-- PV -->
+
+          <div class="form-field">
+
+            <label for="data-pv">
+              PV
+            </label>
+
+            <input
+              id="data-pv"
+              type="number"
+              min="0"
+              step="1"
+              placeholder="PV"
+              required
+            />
+
+          </div>
+
+
+          <!-- AdSense -->
+
+          <div class="form-field">
+
+            <label for="data-adsense">
+              AdSense 예상수익
+            </label>
+
+            <input
+              id="data-adsense"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="예: 0.15"
+            />
+
+          </div>
+
+
+          <!-- GSC 클릭 -->
+
+          <div class="form-field">
+
+            <label for="data-gsc-clicks">
+              GSC 클릭
+            </label>
+
+            <input
+              id="data-gsc-clicks"
+              type="number"
+              min="0"
+              step="1"
+              placeholder="클릭"
+            />
+
+          </div>
+
+
+          <!-- GSC 노출 -->
+
+          <div class="form-field">
+
+            <label for="data-gsc-impressions">
+              GSC 노출
+            </label>
+
+            <input
+              id="data-gsc-impressions"
+              type="number"
+              min="0"
+              step="1"
+              placeholder="노출"
+            />
+
+          </div>
+
+
+          <!-- GSC CTR -->
+
+          <div class="form-field">
+
+            <label for="data-gsc-ctr">
+              GSC CTR (%)
+            </label>
+
+            <input
+              id="data-gsc-ctr"
+              type="number"
+              min="0"
+              max="100"
+              step="0.01"
+              placeholder="예: 1.64"
+            />
+
+          </div>
+
+
+          <!-- GSC 평균순위 -->
+
+          <div class="form-field">
+
+            <label for="data-gsc-position">
+              GSC 평균순위
+            </label>
+
+            <input
+              id="data-gsc-position"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="예: 7.36"
+            />
+
+          </div>
+
+
+          <!-- 메모 -->
+
+          <div class="form-field form-field-wide">
+
+            <label for="data-memo">
+              메모
+            </label>
+
+            <input
+              id="data-memo"
+              type="text"
+              placeholder="메모"
+            />
+
+          </div>
+
+
+          <!-- 버튼 -->
+
+          <div class="form-actions">
+
+            <button
+              id="data-submit-button"
+              type="submit"
+            >
+              추가
+            </button>
+
+            <button
+              id="edit-cancel-button"
+              class="hidden"
+              type="button"
+            >
+              수정 취소
+            </button>
+
+          </div>
 
         </form>
 
@@ -227,25 +458,34 @@
           id="edit-status"
           class="loading hidden"
         >
-          데이터를 수정하는 중입니다.
         </div>
 
+
+        <!-- ==================================================
+             데이터 표
+        ================================================== -->
 
         <div class="table-wrapper">
 
           <table>
 
             <thead>
+
               <tr>
                 <th>날짜</th>
-                <th>PV</th>
+                <th>게시물</th>
+                <th>페이지</th>
                 <th>사용자</th>
+                <th>PV</th>
+                <th>AdSense</th>
                 <th>클릭</th>
                 <th>노출</th>
                 <th>CTR</th>
                 <th>검색순위</th>
+                <th>메모</th>
                 <th>관리</th>
               </tr>
+
             </thead>
 
             <tbody id="data-table-body">
@@ -262,20 +502,26 @@
   </main>
 
 
-  <!-- Markdown -->
+  <!-- ==================================================
+       Libraries
+  ================================================== -->
+
   <script
     src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"
   ></script>
 
-  <!-- HTML 보안 처리 -->
   <script
     src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"
   ></script>
 
-  <!-- 그래프 -->
   <script
     src="https://cdn.jsdelivr.net/npm/chart.js"
   ></script>
+
+
+  <!-- ==================================================
+       Application
+  ================================================== -->
 
   <script src="config.js"></script>
   <script src="app.js"></script>
