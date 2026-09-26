@@ -177,7 +177,7 @@ def chat(
             messages=messages,
             tools=TOOLS,
             tool_choice="auto",
-            max_tokens=700,
+            max_tokens=2000,
         )
 
         assistant_message = response.choices[0].message
